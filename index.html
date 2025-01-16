@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Exemplo de Service Worker</title>
+</head>
+<body>
+
+<h1>Teste de Service Worker</h1>
+
+<p id="status">Verificando suporte a Service Workers...</p>
+<p id="mensagem"></p>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('./sw.js')
+        .then(registration => {
+          console.log('Service Worker registrado:', registration);
+          document.getElementById('status').textContent = 'Service Worker registrado!';
+
+          // Envia mensagem para o Service Worker após 1 segundo (para garantir que esteja ativo)
+          setTimeout(() => {
+            if (navigator.serviceWorker.controller) { // Verifica se o SW está controlando a página
+              navigator.serviceWorker.controller.postMessage({ mensagem: 'Olá do script principal!' });
+            }
+          }, 1000);
+
+
+          // Escuta por mensagens do Service Worker
+          navigator.serviceWorker.addEventListener('message', event => {
+             document.getElementById('mensagem').textContent = `Mensagem do SW: ${event.data.resposta}`;
+          });
+
+        })
+        .catch(error => {
+          console.error('Falha ao registrar o Service Worker:', error);
+          document.getElementById('status').textContent = 'Falha ao registrar o Service Worker.';
+        });
+    });
+  } else {
+    document.getElementById('status').textContent = 'Service Workers não são suportados.';
+  }
+</script>
+
+</body>
+</html>
